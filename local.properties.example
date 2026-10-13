@@ -1,0 +1,5 @@
+# Copy this file to local.properties (same folder) and fill in your own key.
+# local.properties is gitignored, so your real key never gets committed.
+#
+# Get a free Gemini API key (no card required) at https://aistudio.google.com
+GEMINI_API_KEY=your_key_here
