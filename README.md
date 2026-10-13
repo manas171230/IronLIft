@@ -1,19 +1,8 @@
 # IronLog — Android app project
 
-This is a real Android Studio project, not a wrapped browser link. It embeds
-the IronLog web app as an offline local file and adds a native piece the
-browser version can't do: system notifications that fire on schedule even
-when the app is fully closed, via `AlarmManager` + a `BroadcastReceiver`.
-
-I couldn't compile this into a signed `.apk` myself — that needs the Android
-SDK and Google's Maven repositories, which aren't reachable from the sandbox
-I build in. Building it takes about 10 minutes on your machine.
-
-**This project is git-ready.** Your Gemini API key is kept out of source
-control entirely — it lives in `local.properties`, which `.gitignore`
-excludes, so you can push this repo (public or private) without leaking it.
-A `local.properties` with your real key is already included in this zip so
-it builds immediately; it just won't follow you into git.
+This is a Android Studio project. It embeds the IronLog web app as an offline 
+local file and adds a native piece the browser version can't do: system
+notifications that fire on schedule even when the app is fully closed, via `AlarmManager` + a `BroadcastReceiver`.
 
 ## What you need
 - [Android Studio](https://developer.android.com/studio) (free), which
