@@ -1,0 +1,6 @@
+<resources>
+    <style name="Theme.IronLog" parent="Theme.AppCompat.DayNight.NoActionBar">
+        <item name="android:statusBarColor">#16181D</item>
+        <item name="android:windowBackground">#16181D</item>
+    </style>
+</resources>

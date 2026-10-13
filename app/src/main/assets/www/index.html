@@ -1,0 +1,1159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>IronLog</title>
+<meta name="theme-color" content="#16181D">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="IronLog">
+<link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='20' fill='%2316181D'/%3E%3Crect x='14' y='44' width='10' height='12' fill='%23F5F3EE'/%3E%3Crect x='24' y='38' width='8' height='24' fill='%23F5F3EE'/%3E%3Crect x='32' y='47' width='36' height='6' fill='%23FFB020'/%3E%3Crect x='68' y='38' width='8' height='24' fill='%23F5F3EE'/%3E%3Crect x='76' y='44' width='10' height='12' fill='%23F5F3EE'/%3E%3C/svg%3E">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='20' fill='%2316181D'/%3E%3Crect x='14' y='44' width='10' height='12' fill='%23F5F3EE'/%3E%3Crect x='24' y='38' width='8' height='24' fill='%23F5F3EE'/%3E%3Crect x='32' y='47' width='36' height='6' fill='%23FFB020'/%3E%3Crect x='68' y='38' width='8' height='24' fill='%23F5F3EE'/%3E%3Crect x='76' y='44' width='10' height='12' fill='%23F5F3EE'/%3E%3C/svg%3E">
+<link rel="manifest" href='data:application/manifest+json,{"name":"IronLog","short_name":"IronLog","start_url":".","display":"standalone","background_color":"%2316181D","theme_color":"%2316181D","icons":[{"src":"data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 100 100%27%3E%3Crect width=%27100%27 height=%27100%27 rx=%2720%27 fill=%27%2316181D%27/%3E%3Crect x=%2714%27 y=%2744%27 width=%2710%27 height=%2712%27 fill=%27%23F5F3EE%27/%3E%3Crect x=%2724%27 y=%2738%27 width=%278%27 height=%2724%27 fill=%27%23F5F3EE%27/%3E%3Crect x=%2732%27 y=%2747%27 width=%2736%27 height=%276%27 fill=%27%23FFB020%27/%3E%3Crect x=%2768%27 y=%2738%27 width=%278%27 height=%2724%27 fill=%27%23F5F3EE%27/%3E%3Crect x=%2776%27 y=%2744%27 width=%2710%27 height=%2712%27 fill=%27%23F5F3EE%27/%3E%3C/svg%3E","sizes":"100x100","type":"image/svg+xml","purpose":"any maskable"}]}'>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#16181D;
+    --surface:#1E2128;
+    --surface-2:#262A33;
+    --line:#31353F;
+    --ink:#F5F3EE;
+    --ink-dim:#9298A5;
+    --ink-faint:#5E6472;
+    --amber:#FFB020;
+    --amber-ink:#1A1204;
+    --teal:#3DD6C4;
+    --coral:#FF6B4A;
+    --green:#8FD657;
+    --red:#FF5470;
+    --radius-pill: 999px;
+    --radius-sm: 4px;
+    font-size:16px;
+    box-sizing:border-box;
+    padding-top:env(safe-area-inset-top,0px);
+    padding-bottom:env(safe-area-inset-bottom,0px);
+  }
+  :root:not([data-theme="light"]){ }
+  @media (prefers-color-scheme:light){
+    :root:not([data-theme="dark"]){
+      --bg:#EFEDE7; --surface:#FFFFFF; --surface-2:#F5F3EE; --line:#DEDAD0;
+      --ink:#191A1D; --ink-dim:#5B5F68; --ink-faint:#9A9DA5;
+      --amber-ink:#1A1204;
+    }
+  }
+  html{ scroll-padding-top:env(safe-area-inset-top,0px); height:100%; }
+  *{ box-sizing:border-box; }
+  body{
+    margin:0; height:100%; background:var(--bg); color:var(--ink);
+    font-family:'Inter',system-ui,sans-serif;
+    -webkit-tap-highlight-color:transparent;
+    overscroll-behavior-y:none;
+  }
+  .display{ font-family:'Bebas Neue',system-ui,sans-serif; letter-spacing:0.02em; }
+
+  #app{ max-width:480px; margin:0 auto; min-height:100%; display:flex; flex-direction:column; position:relative; }
+
+  header.top{
+    position:sticky; top:0; z-index:20; background:var(--bg);
+    padding:calc(env(safe-area-inset-top,0px) + 18px) 20px 10px;
+    display:flex; align-items:baseline; justify-content:space-between;
+  }
+  header.top .brand{ font-family:'Bebas Neue'; font-size:26px; letter-spacing:0.06em; }
+  header.top .brand span{ color:var(--amber); }
+  header.top .date{ font-size:12px; color:var(--ink-dim); font-weight:500; }
+
+  main{ flex:1; padding:4px 20px 100px; }
+  section.screen{ display:none; animation:fade .18s ease; }
+  section.screen.active{ display:block; }
+  @keyframes fade{ from{opacity:0; transform:translateY(4px)} to{opacity:1; transform:none} }
+
+  /* ---- Hero stat block ---- */
+  .hero{
+    background:var(--surface); border:1px solid var(--line); border-radius:10px;
+    padding:20px; margin:10px 0 16px; position:relative; overflow:hidden;
+  }
+  .hero .bar-track{ height:5px; background:var(--surface-2); border-radius:99px; overflow:hidden; margin-top:14px; }
+  .hero .bar-fill{ height:100%; border-radius:99px; transition:width .4s ease; }
+  .hero-row{ display:flex; align-items:flex-end; justify-content:space-between; gap:10px; }
+  .hero-num{ font-family:'Bebas Neue'; font-size:56px; line-height:0.85; }
+  .hero-label{ font-size:12px; color:var(--ink-dim); font-weight:600; text-transform:uppercase; letter-spacing:.08em; margin-bottom:6px; }
+  .hero-sub{ font-size:13px; color:var(--ink-dim); text-align:right; }
+
+  .coach-line{
+    font-size:14px; color:var(--ink); background:var(--surface-2); border-left:3px solid var(--amber);
+    padding:10px 12px; border-radius:0 6px 6px 0; margin:0 0 16px;
+  }
+
+  /* ---- Metric grid (home) ---- */
+  .grid3{ display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px; margin-bottom:16px; }
+  .metric{ background:var(--surface); border:1px solid var(--line); border-radius:10px; padding:12px 10px; }
+  .metric .k{ font-family:'Bebas Neue'; font-size:26px; }
+  .metric .l{ font-size:11px; color:var(--ink-dim); font-weight:600; margin-top:2px; }
+  .metric.teal .k{ color:var(--teal); }
+  .metric.coral .k{ color:var(--coral); }
+  .metric.amber .k{ color:var(--amber); }
+
+  h2.section-title{ font-family:'Bebas Neue'; font-size:20px; letter-spacing:.03em; margin:22px 0 10px; color:var(--ink); }
+  h2.section-title:first-child{ margin-top:6px; }
+
+  /* ---- Cards / list rows ---- */
+  .card{ background:var(--surface); border:1px solid var(--line); border-radius:10px; padding:14px; margin-bottom:10px; }
+  .row{ display:flex; align-items:center; justify-content:space-between; gap:10px; }
+  .row + .row{ margin-top:8px; padding-top:8px; border-top:1px solid var(--line); }
+  .row .name{ font-weight:600; font-size:14.5px; }
+  .row .meta{ font-size:12px; color:var(--ink-dim); margin-top:2px; }
+  .row .val{ font-family:'Bebas Neue'; font-size:20px; color:var(--ink); white-space:nowrap; }
+  .empty{ color:var(--ink-faint); font-size:13.5px; padding:18px 4px; text-align:center; line-height:1.5; }
+
+  .icon-btn{ width:30px; height:30px; border-radius:8px; border:1px solid var(--line); background:var(--surface-2); color:var(--ink-dim); display:flex; align-items:center; justify-content:center; font-size:16px; flex-shrink:0; }
+
+  /* ---- Buttons ---- */
+  .btn{
+    display:inline-flex; align-items:center; justify-content:center; gap:6px;
+    border:none; border-radius:var(--radius-pill); padding:13px 18px; font-weight:700; font-size:14.5px;
+    font-family:'Inter'; cursor:pointer; width:100%;
+  }
+  .btn-primary{ background:var(--amber); color:var(--amber-ink); }
+  .btn-primary:active{ transform:scale(.98); }
+  .btn-ghost{ background:transparent; border:1px solid var(--line); color:var(--ink); }
+  .btn-row{ display:flex; gap:8px; }
+  .btn-row .btn{ width:auto; flex:1; }
+
+  .chip-row{ display:flex; gap:8px; flex-wrap:wrap; margin:10px 0; }
+  .chip{ border:1px solid var(--line); background:var(--surface); color:var(--ink-dim); padding:9px 14px; border-radius:var(--radius-pill); font-size:13.5px; font-weight:600; }
+  .chip.active{ background:var(--amber); border-color:var(--amber); color:var(--amber-ink); }
+
+  /* ---- Water glass grid ---- */
+  .glasses{ display:grid; grid-template-columns:repeat(6,1fr); gap:8px; margin:16px 0; }
+  .glass{ aspect-ratio:1; border-radius:8px; border:1px solid var(--line); background:var(--surface); display:flex; align-items:center; justify-content:center; font-size:17px; }
+  .glass.filled{ background:rgba(61,214,196,.16); border-color:var(--teal); }
+
+  /* ---- Forms ---- */
+  .field{ margin-bottom:12px; }
+  .field label{ display:block; font-size:12px; font-weight:600; color:var(--ink-dim); margin-bottom:6px; text-transform:uppercase; letter-spacing:.05em; }
+  .field input, .field select{
+    width:100%; background:var(--surface-2); border:1px solid var(--line); color:var(--ink);
+    border-radius:8px; padding:12px 12px; font-size:15px; font-family:'Inter';
+  }
+  .field input:focus, .field select:focus{ outline:2px solid var(--amber); outline-offset:1px; }
+  .field-row{ display:flex; gap:10px; }
+  .field-row .field{ flex:1; }
+
+  /* ---- Sheet (modal) ---- */
+  .scrim{ position:fixed; inset:0; background:rgba(0,0,0,.55); z-index:40; display:none; }
+  .scrim.open{ display:block; }
+  .sheet{
+    position:fixed; left:0; right:0; bottom:0; z-index:41; max-width:480px; margin:0 auto;
+    background:var(--surface); border:1px solid var(--line); border-bottom:none;
+    border-radius:18px 18px 0 0; padding:8px 20px calc(24px + env(safe-area-inset-bottom,0px));
+    transform:translateY(110%); transition:transform .25s ease; max-height:85vh; overflow-y:auto;
+  }
+  .sheet.open{ transform:translateY(0); }
+  .sheet-handle{ width:36px; height:4px; background:var(--line); border-radius:99px; margin:10px auto 16px; }
+  .sheet h3{ font-family:'Bebas Neue'; font-size:22px; margin:0 0 14px; letter-spacing:.02em; }
+
+  .sets-list{ margin-bottom:10px; }
+  .set-row{ display:flex; align-items:center; gap:8px; background:var(--surface-2); border-radius:8px; padding:9px 10px; margin-bottom:6px; }
+  .set-row .set-idx{ font-family:'Bebas Neue'; font-size:16px; color:var(--ink-faint); width:20px; }
+  .set-row input{ background:transparent; border:none; color:var(--ink); font-size:15px; width:100%; padding:2px; font-family:'Inter'; font-weight:600; }
+  .set-row .x{ color:var(--ink-faint); font-size:13px; }
+  .set-row button{ background:none; border:none; color:var(--red); font-size:16px; padding:2px 4px; }
+
+  /* ---- Bottom nav ---- */
+  nav.tabbar{
+    position:fixed; left:0; right:0; bottom:0; max-width:480px; margin:0 auto; z-index:15;
+    background:var(--surface); border-top:1px solid var(--line);
+    display:flex; padding:8px 6px calc(8px + env(safe-area-inset-bottom,0px));
+  }
+  nav.tabbar button{
+    flex:1; background:none; border:none; display:flex; flex-direction:column; align-items:center; gap:3px;
+    color:var(--ink-faint); font-family:'Inter'; font-size:10.5px; font-weight:700; padding:6px 2px;
+    text-transform:uppercase; letter-spacing:.03em;
+  }
+  nav.tabbar button svg{ width:22px; height:22px; }
+  nav.tabbar button.active{ color:var(--amber); }
+  nav.tabbar button.active svg{ filter:drop-shadow(0 0 0 var(--amber)); }
+
+  /* ---- Reminder toggle ---- */
+  .switch{ width:42px; height:24px; border-radius:99px; background:var(--surface-2); border:1px solid var(--line); position:relative; flex-shrink:0; }
+  .switch.on{ background:var(--amber); border-color:var(--amber); }
+  .switch::after{ content:''; position:absolute; top:2px; left:2px; width:18px; height:18px; border-radius:50%; background:var(--ink); transition:transform .18s ease; }
+  .switch.on::after{ transform:translateX(18px); background:var(--amber-ink); }
+
+  .toast{
+    position:fixed; left:20px; right:20px; bottom:calc(90px + env(safe-area-inset-bottom,0px)); z-index:60; max-width:440px; margin:0 auto;
+    background:var(--ink); color:var(--bg); font-weight:700; font-size:13.5px; padding:13px 16px; border-radius:10px;
+    transform:translateY(20px); opacity:0; pointer-events:none; transition:all .25s ease;
+  }
+  .toast.show{ transform:translateY(0); opacity:1; }
+
+  .note{ font-size:12.5px; color:var(--ink-faint); line-height:1.5; margin-top:4px; }
+  .streak-badge{ display:inline-flex; align-items:center; gap:5px; background:var(--surface-2); border:1px solid var(--line); padding:5px 10px 5px 8px; border-radius:99px; font-size:12px; font-weight:700; color:var(--amber); }
+
+  ::selection{ background:var(--amber); color:var(--amber-ink); }
+  a{ color:var(--teal); }
+</style>
+</head>
+<body>
+<div id="app">
+
+  <header class="top">
+    <div class="brand">IRON<span>LOG</span></div>
+    <div class="date" id="headerDate">—</div>
+  </header>
+
+  <main>
+
+    <!-- ============ HOME ============ -->
+    <section class="screen active" id="screen-home">
+      <div class="hero">
+        <div class="hero-row">
+          <div>
+            <div class="hero-label">Calories left today</div>
+            <div class="hero-num" id="homeCalLeft">—</div>
+          </div>
+          <div class="hero-sub" id="homeCalSub">0 / 0 kcal</div>
+        </div>
+        <div class="bar-track"><div class="bar-fill" id="homeCalBar" style="width:0%;background:var(--coral)"></div></div>
+      </div>
+
+      <div class="coach-line" id="coachLine">Log something. The board doesn't fill itself.</div>
+
+      <div class="grid3">
+        <div class="metric teal">
+          <div class="k" id="homeWater">0</div>
+          <div class="l">ML WATER</div>
+        </div>
+        <div class="metric amber">
+          <div class="k" id="homeSets">0</div>
+          <div class="l">SETS TODAY</div>
+        </div>
+        <div class="metric" style="color:var(--green)">
+          <div class="k" id="homeStreak" style="color:var(--green)">0</div>
+          <div class="l">DAY STREAK</div>
+        </div>
+      </div>
+
+      <h2 class="section-title">Quick add</h2>
+      <div class="btn-row" style="margin-bottom:10px">
+        <button class="btn btn-primary" onclick="openWorkoutSheet()">+ Lift</button>
+        <button class="btn btn-primary" style="background:var(--coral)" onclick="openMealSheet()">+ Meal</button>
+        <button class="btn btn-primary" style="background:var(--teal)" onclick="addWater(250)">+ Water</button>
+      </div>
+
+      <h2 class="section-title">Today's reminders</h2>
+      <div class="card" id="homeReminders"></div>
+    </section>
+
+    <!-- ============ LIFT ============ -->
+    <section class="screen" id="screen-lift">
+      <div class="hero" style="padding-bottom:16px;">
+        <div class="hero-row">
+          <div>
+            <div class="hero-label">Sets logged today</div>
+            <div class="hero-num" id="liftHeroNum">0</div>
+          </div>
+          <span class="streak-badge" id="liftPrBadge" style="display:none">🏆 NEW PR</span>
+        </div>
+      </div>
+
+      <button class="btn btn-primary" onclick="openWorkoutSheet()">+ Log a lift</button>
+
+      <h2 class="section-title">Your split</h2>
+      <div class="card" id="splitCard"></div>
+      <div class="btn-row" style="margin-bottom:16px">
+        <button class="btn btn-ghost" onclick="openSplitManager()">Manage splits</button>
+        <button class="btn btn-ghost" id="advanceDayBtn" onclick="advanceSplitDay()" style="display:none">Next day →</button>
+      </div>
+
+      <h2 class="section-title">Today's session</h2>
+      <div id="liftToday"></div>
+
+      <h2 class="section-title">History</h2>
+      <div id="liftHistory"></div>
+    </section>
+
+    <!-- ============ MEALS ============ -->
+    <section class="screen" id="screen-meals">
+      <div class="hero">
+        <div class="hero-row">
+          <div>
+            <div class="hero-label">Eaten today</div>
+            <div class="hero-num" id="mealHeroNum">0</div>
+          </div>
+          <div class="hero-sub" id="mealHeroSub">Goal 0 kcal</div>
+        </div>
+        <div class="bar-track"><div class="bar-fill" id="mealBar" style="width:0%;background:var(--coral)"></div></div>
+      </div>
+
+      <button class="btn btn-primary" style="background:var(--coral)" onclick="openMealSheet()">+ Log a meal</button>
+
+      <div class="grid3" style="margin-top:14px">
+        <div class="metric">
+          <div class="k" id="mealProteinTotal" style="color:var(--teal)">0</div>
+          <div class="l">G PROTEIN</div>
+        </div>
+        <div class="metric">
+          <div class="k" id="mealCarbsTotal" style="color:var(--amber)">0</div>
+          <div class="l">G CARBS</div>
+        </div>
+        <div class="metric">
+          <div class="k" id="mealFatTotal" style="color:var(--coral)">0</div>
+          <div class="l">G FAT</div>
+        </div>
+      </div>
+
+      <h2 class="section-title">Today's meals</h2>
+      <div id="mealList"></div>
+      <div class="note">Tap any meal to edit its name, calories or time.</div>
+
+      <h2 class="section-title">Daily calorie goal</h2>
+      <div class="card">
+        <div class="field" style="margin-bottom:8px">
+          <input type="number" id="calGoalInput" inputmode="numeric" placeholder="e.g. 2200">
+        </div>
+        <button class="btn btn-ghost" onclick="saveCalGoal()">Save goal</button>
+      </div>
+    </section>
+
+    <!-- ============ WATER ============ -->
+    <section class="screen" id="screen-water">
+      <div class="hero">
+        <div class="hero-row">
+          <div>
+            <div class="hero-label">Water today</div>
+            <div class="hero-num" id="waterHeroNum">0<span style="font-size:22px">ml</span></div>
+          </div>
+          <div class="hero-sub" id="waterHeroSub">Goal 0 ml</div>
+        </div>
+        <div class="bar-track"><div class="bar-fill" id="waterBar" style="width:0%;background:var(--teal)"></div></div>
+      </div>
+
+      <div class="glasses" id="glassGrid"></div>
+
+      <div class="btn-row">
+        <button class="btn btn-primary" style="background:var(--teal)" onclick="addWater(250)">+250ml</button>
+        <button class="btn btn-ghost" onclick="addWater(500)">+500ml</button>
+        <button class="btn btn-ghost" onclick="addWater(-250)">−250ml</button>
+      </div>
+
+      <h2 class="section-title">Daily water goal</h2>
+      <div class="card">
+        <div class="field" style="margin-bottom:8px">
+          <input type="number" id="waterGoalInput" inputmode="numeric" placeholder="e.g. 2500 (ml)">
+        </div>
+        <button class="btn btn-ghost" onclick="saveWaterGoal()">Save goal</button>
+      </div>
+    </section>
+
+    <!-- ============ REMINDERS ============ -->
+    <section class="screen" id="screen-reminders">
+      <div class="card" id="notifPermCard">
+        <div class="row">
+          <div>
+            <div class="name">Push notifications</div>
+            <div class="meta" id="notifStatusText">Not enabled yet</div>
+          </div>
+          <button class="btn btn-primary" style="width:auto;padding:10px 16px" id="notifEnableBtn" onclick="requestNotifPermission()">Enable</button>
+        </div>
+        <div class="note">Reminders fire while IronLog is open or running in the background on this device. Browsers don't allow silent apps to wake themselves when fully closed — for that you'd need a native app. Keep this tab open or installed to your home screen for the best shot at on-time nudges.</div>
+      </div>
+
+      <h2 class="section-title">Your reminders</h2>
+      <div id="reminderList"></div>
+      <button class="btn btn-ghost" onclick="openReminderSheet()">+ Add reminder</button>
+
+      <h2 class="section-title">Streak guard</h2>
+      <div class="card">
+        <div class="row">
+          <div>
+            <div class="name">Guards left this week</div>
+            <div class="meta">Auto-covers one missed check-in so your streak survives.</div>
+          </div>
+          <div class="val" id="guardCount">1</div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <nav class="tabbar">
+    <button class="active" data-tab="home" onclick="showTab('home')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 11.5 12 4l8 7.5"/><path d="M6 10v9h12v-9"/></svg>
+      Home
+    </button>
+    <button data-tab="lift" onclick="showTab('lift')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 12h2M20 12h2M6 8v8M18 8v8M6 12h12" stroke-linecap="round"/></svg>
+      Lift
+    </button>
+    <button data-tab="meals" onclick="showTab('meals')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3v7a2 2 0 0 0 4 0V3M8 3v18M18 3c-2 2-2 5-2 8 0 2 1 2 2 2v7"/></svg>
+      Meals
+    </button>
+    <button data-tab="water" onclick="showTab('water')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M12 3S5 11 5 15.5a7 7 0 0 0 14 0C19 11 12 3 12 3Z"/></svg>
+      Water
+    </button>
+    <button data-tab="reminders" onclick="showTab('reminders')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 1 0-12 0c0 7-3 9-3 9h18s-3-2-3-9M13.7 21a2 2 0 0 1-3.4 0"/></svg>
+      Alerts
+    </button>
+  </nav>
+</div>
+
+<!-- ============ WORKOUT SHEET ============ -->
+<div class="scrim" id="scrim" onclick="closeSheets()"></div>
+<div class="sheet" id="sheetWorkout">
+  <div class="sheet-handle"></div>
+  <h3>Log a lift</h3>
+  <div class="field">
+    <label>Exercise</label>
+    <input id="woName" list="exerciseList" placeholder="e.g. Bench Press">
+    <datalist id="exerciseList"></datalist>
+  </div>
+  <div class="sets-list" id="woSets"></div>
+  <button class="btn btn-ghost" style="margin-bottom:14px" onclick="addSetRow()">+ Add set</button>
+  <button class="btn btn-primary" onclick="saveWorkout()">Save lift</button>
+</div>
+
+<!-- ============ MEAL SHEET ============ -->
+<div class="sheet" id="sheetMeal">
+  <div class="sheet-handle"></div>
+  <h3 id="mealSheetTitle">Log a meal</h3>
+  <div class="field">
+    <label>What did you eat</label>
+    <input id="mName" placeholder="e.g. Chicken rice bowl">
+  </div>
+  <div class="field-row">
+    <div class="field">
+      <label>Calories</label>
+      <input id="mCals" type="number" inputmode="numeric" placeholder="kcal">
+    </div>
+    <div class="field">
+      <label>Meal</label>
+      <select id="mType">
+        <option>Breakfast</option><option>Lunch</option><option>Dinner</option><option>Snack</option>
+      </select>
+    </div>
+  </div>
+  <div class="field">
+    <label>Time</label>
+    <input id="mTime" type="time">
+  </div>
+  <div class="field-row">
+    <div class="field">
+      <label>Protein (g)</label>
+      <input id="mProtein" type="number" inputmode="numeric" placeholder="0">
+    </div>
+    <div class="field">
+      <label>Carbs (g)</label>
+      <input id="mCarbs" type="number" inputmode="numeric" placeholder="0">
+    </div>
+    <div class="field">
+      <label>Fat (g)</label>
+      <input id="mFat" type="number" inputmode="numeric" placeholder="0">
+    </div>
+  </div>
+  <button class="btn btn-ghost" id="mPhotoBtn" style="display:none;margin-bottom:12px" onclick="document.getElementById('mPhotoInput').click()">📸 Estimate from photo</button>
+  <input type="file" id="mPhotoInput" accept="image/*" capture="environment" style="display:none" onchange="onMealPhotoSelected(event)">
+  <button class="btn btn-primary" style="background:var(--coral)" onclick="saveMeal()">Save meal</button>
+  <button class="btn btn-ghost" id="mDeleteBtn" style="margin-top:8px;display:none;color:var(--red);border-color:var(--red)" onclick="deleteMealFromSheet()">Delete meal</button>
+</div>
+
+<!-- ============ SPLIT MANAGER SHEET ============ -->
+<div class="sheet" id="sheetSplitManager">
+  <div class="sheet-handle"></div>
+  <h3>Your splits</h3>
+  <div id="splitManagerList"></div>
+  <button class="btn btn-primary" onclick="openSplitEditor()">+ New split</button>
+</div>
+
+<!-- ============ SPLIT EDITOR SHEET ============ -->
+<div class="sheet" id="sheetSplitEditor">
+  <div class="sheet-handle"></div>
+  <h3 id="splitEditorTitle">New split</h3>
+  <div class="field">
+    <label>Split name</label>
+    <input id="splitName" placeholder="e.g. Push Pull Legs">
+  </div>
+  <div id="splitDaysList"></div>
+  <button class="btn btn-ghost" style="margin-bottom:14px" onclick="addSplitDay()">+ Add day</button>
+  <button class="btn btn-primary" onclick="saveSplit()">Save split</button>
+  <button class="btn btn-ghost" id="splitDeleteBtn" style="margin-top:8px;display:none;color:var(--red);border-color:var(--red)" onclick="deleteSplitFromEditor()">Delete split</button>
+</div>
+
+<!-- ============ REMINDER SHEET ============ -->
+<div class="sheet" id="sheetReminder">
+  <div class="sheet-handle"></div>
+  <h3>New reminder</h3>
+  <div class="field">
+    <label>Label</label>
+    <input id="rLabel" placeholder="e.g. Lunch">
+  </div>
+  <div class="field-row">
+    <div class="field">
+      <label>Time</label>
+      <input id="rTime" type="time">
+    </div>
+    <div class="field">
+      <label>Type</label>
+      <select id="rType">
+        <option value="meal">Meal</option>
+        <option value="water">Water</option>
+        <option value="lift">Workout</option>
+        <option value="custom">Custom</option>
+      </select>
+    </div>
+  </div>
+  <button class="btn btn-primary" onclick="saveReminder()">Save reminder</button>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ---------------- State ---------------- */
+const STORE_KEY = 'ironlog_state_v1';
+const COMMON_EXERCISES = ['Bench Press','Squat','Deadlift','Overhead Press','Barbell Row','Pull-up','Bicep Curl','Lat Pulldown','Leg Press','Dumbbell Press'];
+
+function defaultState(){
+  return {
+    settings:{ calorieGoal:2200, waterGoal:2500, guardsUsedThisWeek:0, guardWeekStart:todayKey() },
+    days:{},
+    reminders:[
+      {id:'r1', label:'Breakfast', time:'08:00', type:'meal', enabled:true, lastFired:null},
+      {id:'r2', label:'Lunch', time:'13:00', type:'meal', enabled:true, lastFired:null},
+      {id:'r3', label:'Dinner', time:'19:30', type:'meal', enabled:true, lastFired:null},
+      {id:'r4', label:'Sip water', time:'16:00', type:'water', enabled:true, lastFired:null}
+    ],
+    streak:{ count:0, lastCheckin:null },
+    exercises:[],
+    splits:[],
+    activeSplitId:null,
+    activeSplitDayIdx:0
+  };
+}
+
+let state;
+try{
+  const raw = localStorage.getItem(STORE_KEY);
+  state = raw ? JSON.parse(raw) : defaultState();
+  if(!state.settings) state = defaultState();
+  if(!state.splits) state.splits = [];
+  if(state.activeSplitId===undefined) state.activeSplitId = null;
+  if(state.activeSplitDayIdx===undefined) state.activeSplitDayIdx = 0;
+}catch(e){ state = defaultState(); }
+
+function save(){
+  try{ localStorage.setItem(STORE_KEY, JSON.stringify(state)); }
+  catch(e){ console.error('save failed', e); }
+}
+
+/* If this page is running inside the IronLog Android app shell, AndroidBridge
+   exists and we hand it the reminder list so it can schedule real system
+   notifications that fire even when the app is closed. In a normal browser
+   tab AndroidBridge is undefined and this is a harmless no-op. */
+function syncNativeReminders(){
+  if(window.AndroidBridge && window.AndroidBridge.scheduleReminders){
+    try{ window.AndroidBridge.scheduleReminders(JSON.stringify(state.reminders)); }catch(e){}
+  }
+}
+
+function todayKey(){
+  const d = new Date();
+  return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+}
+function getDay(key){
+  key = key || todayKey();
+  if(!state.days[key]) state.days[key] = { meals:[], water:0, workouts:[] };
+  return state.days[key];
+}
+function uid(){ return Date.now().toString(36)+Math.random().toString(36).slice(2,6); }
+
+/* ---------------- Streak ---------------- */
+function touchStreak(){
+  const t = todayKey();
+  if(state.streak.lastCheckin === t) return;
+  const y = new Date(Date.now()-86400000);
+  const yKey = y.getFullYear()+'-'+String(y.getMonth()+1).padStart(2,'0')+'-'+String(y.getDate()).padStart(2,'0');
+  if(state.streak.lastCheckin === yKey || state.streak.lastCheckin === null){
+    state.streak.count += 1;
+  } else {
+    // gap — try to spend a guard
+    if(state.settings.guardsUsedThisWeek < 1){
+      state.settings.guardsUsedThisWeek += 1;
+      state.streak.count += 1;
+    } else {
+      state.streak.count = 1;
+    }
+  }
+  state.streak.lastCheckin = t;
+  save();
+}
+
+/* ---------------- Coach lines ---------------- */
+const COACH_LINES = [
+  "Bar's loaded. Add a set.",
+  "You haven't logged water in a while. Drink.",
+  "Small numbers today become big numbers later. Log it.",
+  "Nobody tracks it for you. Get it down.",
+  "One more set than yesterday. That's the whole game.",
+  "Eat on purpose today, not by accident.",
+  "Consistency beats intensity. Show up on the board."
+];
+function pickCoachLine(){
+  const d = getDay();
+  if(d.workouts.length===0 && d.meals.length===0) return "Nothing logged yet today. Start with one thing.";
+  if(d.water < state.settings.waterGoal*0.3) return "Water's low today. Get a glass in.";
+  const cals = d.meals.reduce((s,m)=>s+m.cals,0);
+  if(cals > state.settings.calorieGoal) return "Over budget today — dial it back at the next meal.";
+  if(d.workouts.length===0) return "No lifts logged yet. Even one set counts.";
+  return COACH_LINES[Math.floor(Math.random()*COACH_LINES.length)];
+}
+
+/* ---------------- Toast ---------------- */
+let toastTimer;
+function showToast(msg){
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(()=>t.classList.remove('show'), 2600);
+}
+
+/* ---------------- Tabs ---------------- */
+function showTab(name){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById('screen-'+name).classList.add('active');
+  document.querySelectorAll('nav.tabbar button').forEach(b=>b.classList.toggle('active', b.dataset.tab===name));
+  renderAll();
+}
+
+/* ---------------- Sheets ---------------- */
+function openSheet(id){
+  document.getElementById('scrim').classList.add('open');
+  document.getElementById(id).classList.add('open');
+}
+function closeSheets(){
+  document.getElementById('scrim').classList.remove('open');
+  document.querySelectorAll('.sheet').forEach(s=>s.classList.remove('open'));
+}
+
+let currentSets = [];
+function openWorkoutSheet(){
+  document.getElementById('woName').value='';
+  currentSets = [{reps:'',weight:''}];
+  renderSetRows();
+  const dl = document.getElementById('exerciseList');
+  dl.innerHTML = [...new Set([...COMMON_EXERCISES, ...state.exercises])].map(e=>`<option value="${escapeHtml(e)}">`).join('');
+  openSheet('sheetWorkout');
+}
+function renderSetRows(){
+  const wrap = document.getElementById('woSets');
+  wrap.innerHTML = currentSets.map((s,i)=>`
+    <div class="set-row">
+      <span class="set-idx">${i+1}</span>
+      <input type="number" inputmode="numeric" placeholder="reps" value="${s.reps}" onchange="currentSets[${i}].reps=this.value">
+      <span class="x">×</span>
+      <input type="number" inputmode="decimal" placeholder="kg" value="${s.weight}" onchange="currentSets[${i}].weight=this.value">
+      <button onclick="removeSetRow(${i})">✕</button>
+    </div>`).join('');
+}
+function addSetRow(){ currentSets.push({reps:'',weight:''}); renderSetRows(); }
+function removeSetRow(i){ currentSets.splice(i,1); if(currentSets.length===0) currentSets.push({reps:'',weight:''}); renderSetRows(); }
+
+function saveWorkout(){
+  const name = document.getElementById('woName').value.trim();
+  if(!name){ showToast('Name the exercise first'); return; }
+  const sets = currentSets.filter(s=>s.reps && s.weight).map(s=>({reps:+s.reps, weight:+s.weight}));
+  if(sets.length===0){ showToast('Add at least one set'); return; }
+  if(!state.exercises.includes(name)) state.exercises.push(name);
+
+  // PR check
+  let isPR = false;
+  const bestBefore = Math.max(0, ...Object.values(state.days).flatMap(d=>d.workouts).filter(w=>w.name.toLowerCase()===name.toLowerCase()).flatMap(w=>w.sets.map(s=>s.weight)));
+  const bestNow = Math.max(...sets.map(s=>s.weight));
+  if(bestNow > bestBefore) isPR = true;
+
+  getDay().workouts.push({ id:uid(), name, sets, time:nowTime(), pr:isPR });
+  touchStreak();
+  save();
+  closeSheets();
+  showToast(isPR ? `New PR on ${name}! 🏆` : 'Lift logged');
+  renderAll();
+}
+
+let editingMealId = null;
+function openMealSheet(){
+  editingMealId = null;
+  document.getElementById('mealSheetTitle').textContent = 'Log a meal';
+  document.getElementById('mDeleteBtn').style.display = 'none';
+  document.getElementById('mName').value='';
+  document.getElementById('mCals').value='';
+  document.getElementById('mProtein').value='';
+  document.getElementById('mCarbs').value='';
+  document.getElementById('mFat').value='';
+  document.getElementById('mType').value = suggestMealType();
+  document.getElementById('mTime').value = nowTime();
+  openSheet('sheetMeal');
+}
+function editMeal(id){
+  const m = getDay().meals.find(m=>m.id===id);
+  if(!m) return;
+  editingMealId = id;
+  document.getElementById('mealSheetTitle').textContent = 'Edit meal';
+  document.getElementById('mDeleteBtn').style.display = 'block';
+  document.getElementById('mName').value = m.name;
+  document.getElementById('mCals').value = m.cals;
+  document.getElementById('mProtein').value = m.protein || '';
+  document.getElementById('mCarbs').value = m.carbs || '';
+  document.getElementById('mFat').value = m.fat || '';
+  document.getElementById('mType').value = m.type;
+  document.getElementById('mTime').value = m.time;
+  openSheet('sheetMeal');
+}
+function deleteMealFromSheet(){
+  if(!editingMealId) return;
+  const d = getDay();
+  d.meals = d.meals.filter(m=>m.id!==editingMealId);
+  save();
+  closeSheets();
+  showToast('Meal deleted');
+  renderAll();
+}
+function suggestMealType(){
+  const h = new Date().getHours();
+  if(h<11) return 'Breakfast';
+  if(h<16) return 'Lunch';
+  if(h<21) return 'Dinner';
+  return 'Snack';
+}
+function saveMeal(){
+  const name = document.getElementById('mName').value.trim();
+  const cals = +document.getElementById('mCals').value;
+  const type = document.getElementById('mType').value;
+  const time = document.getElementById('mTime').value || nowTime();
+  const protein = +document.getElementById('mProtein').value || 0;
+  const carbs = +document.getElementById('mCarbs').value || 0;
+  const fat = +document.getElementById('mFat').value || 0;
+  if(!name){ showToast('Name the meal first'); return; }
+  if(!cals || cals<=0){ showToast('Enter calories'); return; }
+  if(editingMealId){
+    const m = getDay().meals.find(m=>m.id===editingMealId);
+    if(m){ m.name=name; m.cals=cals; m.type=type; m.time=time; m.protein=protein; m.carbs=carbs; m.fat=fat; }
+    showToast('Meal updated');
+  } else {
+    getDay().meals.push({ id:uid(), name, cals, type, time, protein, carbs, fat });
+    touchStreak();
+    showToast('Meal logged');
+  }
+  save();
+  closeSheets();
+  renderAll();
+}
+
+/* ---------------- Photo -> macro estimate (Claude sample capability, or native Gemini bridge in the APK) ---------------- */
+let sampleCap = null;
+let sampleImageLimits = null;
+let nativePhotoEstimateAvailable = false;
+let pendingPhotoResolvers = {};
+
+function onNativePhotoEstimateResult(requestId, resultString){
+  const resolver = pendingPhotoResolvers[requestId];
+  if(resolver){ resolver(resultString); delete pendingPhotoResolvers[requestId]; }
+}
+window.onNativePhotoEstimateResult = onNativePhotoEstimateResult;
+
+function fileToBase64(file){
+  return new Promise((resolve, reject)=>{
+    const reader = new FileReader();
+    reader.onload = () => resolve(String(reader.result).split(',')[1]);
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+
+async function initSampleCapability(){
+  if(window.AndroidBridge && window.AndroidBridge.estimateMealPhoto){
+    nativePhotoEstimateAvailable = true;
+  } else if(window.claude && window.claude.use){
+    try{
+      sampleCap = await window.claude.use('sample');
+      if(sampleCap){
+        const limits = await sampleCap.limits().catch(()=>null);
+        sampleImageLimits = (limits && limits.images) ? limits.images : null;
+      }
+    }catch(e){ sampleCap = null; }
+  }
+  const btn = document.getElementById('mPhotoBtn');
+  if(nativePhotoEstimateAvailable){
+    btn.style.display = 'inline-flex';
+    document.getElementById('mPhotoInput').accept = 'image/*';
+  } else if(sampleCap && sampleImageLimits){
+    btn.style.display = 'inline-flex';
+    document.getElementById('mPhotoInput').accept = sampleImageLimits.mediaTypes.join(',');
+  } else {
+    btn.style.display = 'none';
+  }
+}
+
+async function onMealPhotoSelected(evt){
+  const file = evt.target.files && evt.target.files[0];
+  evt.target.value = '';
+  if(!file) return;
+  const btn = document.getElementById('mPhotoBtn');
+  const original = btn.textContent;
+  btn.textContent = 'Estimating…';
+  btn.disabled = true;
+  try{
+    let data;
+    if(nativePhotoEstimateAvailable){
+      const base64 = await fileToBase64(file);
+      const requestId = uid();
+      const resultPromise = new Promise(resolve=>{ pendingPhotoResolvers[requestId] = resolve; });
+      window.AndroidBridge.estimateMealPhoto(base64, requestId);
+      const raw = await resultPromise;
+      const parsed = JSON.parse(raw);
+      if(parsed && parsed.error) throw { code: parsed.error };
+      data = parsed;
+    } else if(sampleCap){
+      const prompt = 'You are looking at a photo of a meal about to be logged in a food diary. '
+        + 'Identify the dish and give rough nutrition estimates for the portion shown. '
+        + 'Respond with ONLY a JSON object, no other text: '
+        + '{"name": "short dish name", "calories": integer kcal, "protein": integer grams, "carbs": integer grams, "fat": integer grams}. '
+        + 'These are approximate visual estimates, not lab-precise figures — round sensibly.';
+      data = await sampleCap.json(prompt, { images: file });
+    } else {
+      showToast('Photo estimate not available here');
+      return;
+    }
+    if(data && typeof data === 'object'){
+      if(data.name) document.getElementById('mName').value = String(data.name);
+      if(Number.isFinite(+data.calories)) document.getElementById('mCals').value = Math.round(+data.calories);
+      if(Number.isFinite(+data.protein)) document.getElementById('mProtein').value = Math.round(+data.protein);
+      if(Number.isFinite(+data.carbs)) document.getElementById('mCarbs').value = Math.round(+data.carbs);
+      if(Number.isFinite(+data.fat)) document.getElementById('mFat').value = Math.round(+data.fat);
+      showToast('Estimated — check it, then save');
+    } else {
+      showToast("Couldn't read that photo — enter manually");
+    }
+  }catch(e){
+    const copy = {
+      not_granted: "Photo estimates need permission — try the button again",
+      images_unavailable: "Photo estimates aren't available in this view",
+      image_rejected: "Couldn't read that photo — try another",
+      rate_limited: "Too many requests right now — try again shortly",
+      invalid_json: "Couldn't make sense of that photo — enter manually",
+      refused: "Couldn't estimate that photo — enter manually",
+      network_error: "Couldn't reach the estimator — check your connection",
+      missing_key: "No Gemini API key set — add one to local.properties and rebuild"
+    };
+    showToast((e && copy[e.code]) || "Couldn't estimate that one — enter manually");
+  } finally {
+    btn.textContent = original;
+    btn.disabled = false;
+  }
+}
+
+function nowTime(){
+  const d = new Date();
+  return String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0');
+}
+
+/* ---------------- Splits ---------------- */
+function openSplitManager(){ renderSplitManagerList(); openSheet('sheetSplitManager'); }
+
+function renderSplitManagerList(){
+  const wrap = document.getElementById('splitManagerList');
+  wrap.innerHTML = state.splits.length ? state.splits.map(s=>`
+    <div class="card" style="cursor:pointer" onclick="openSplitEditor('${s.id}')"><div class="row">
+      <div><div class="name">${escapeHtml(s.name)}</div><div class="meta">${s.days.length} day${s.days.length===1?'':'s'}</div></div>
+      <div style="display:flex;align-items:center;gap:10px" onclick="event.stopPropagation()">
+        ${state.activeSplitId===s.id ? `<span class="streak-badge">Active</span>` : `<button class="btn btn-ghost" style="width:auto;padding:8px 12px" onclick="setActiveSplit('${s.id}')">Set active</button>`}
+      </div>
+    </div></div>
+  `).join('') : `<div class="empty">No splits yet. Build your first one — e.g. Push / Pull / Legs.</div>`;
+}
+
+function setActiveSplit(id){
+  state.activeSplitId = id;
+  state.activeSplitDayIdx = 0;
+  save();
+  renderSplitManagerList();
+  renderAll();
+  showToast('Split activated');
+}
+
+let editingSplitId = null;
+let editingSplitDays = [];
+function openSplitEditor(id){
+  editingSplitId = id || null;
+  const existing = id ? state.splits.find(s=>s.id===id) : null;
+  document.getElementById('splitEditorTitle').textContent = existing ? 'Edit split' : 'New split';
+  document.getElementById('splitName').value = existing ? existing.name : '';
+  editingSplitDays = existing ? JSON.parse(JSON.stringify(existing.days)) : [{name:'Day 1', exercises:''}];
+  document.getElementById('splitDeleteBtn').style.display = existing ? 'block' : 'none';
+  renderSplitDayRows();
+  openSheet('sheetSplitEditor');
+}
+function renderSplitDayRows(){
+  const wrap = document.getElementById('splitDaysList');
+  wrap.innerHTML = editingSplitDays.map((d,i)=>`
+    <div class="card" style="padding:10px">
+      <div class="field" style="margin-bottom:8px">
+        <label>Day name</label>
+        <input value="${escapeHtml(d.name)}" placeholder="e.g. Push" onchange="editingSplitDays[${i}].name=this.value">
+      </div>
+      <div class="field" style="margin-bottom:6px">
+        <label>Exercises (comma separated)</label>
+        <input value="${escapeHtml(d.exercises)}" placeholder="Bench Press, Overhead Press, Dips" onchange="editingSplitDays[${i}].exercises=this.value">
+      </div>
+      <button class="btn btn-ghost" style="width:auto;padding:7px 12px;color:var(--red);border-color:var(--red)" onclick="removeSplitDay(${i})">Remove day</button>
+    </div>
+  `).join('');
+}
+function addSplitDay(){ editingSplitDays.push({name:'Day '+(editingSplitDays.length+1), exercises:''}); renderSplitDayRows(); }
+function removeSplitDay(i){ editingSplitDays.splice(i,1); if(editingSplitDays.length===0) editingSplitDays.push({name:'Day 1', exercises:''}); renderSplitDayRows(); }
+
+function saveSplit(){
+  const name = document.getElementById('splitName').value.trim();
+  if(!name){ showToast('Name your split'); return; }
+  const days = editingSplitDays.filter(d=>d.name.trim()).map(d=>({name:d.name.trim(), exercises:d.exercises.trim()}));
+  if(days.length===0){ showToast('Add at least one day'); return; }
+  if(editingSplitId){
+    const s = state.splits.find(s=>s.id===editingSplitId);
+    if(s){ s.name=name; s.days=days; }
+  } else {
+    const s = { id:uid(), name, days };
+    state.splits.push(s);
+    if(!state.activeSplitId) state.activeSplitId = s.id;
+  }
+  save();
+  closeSheets();
+  showToast('Split saved');
+  renderAll();
+}
+function deleteSplitFromEditor(){
+  if(!editingSplitId) return;
+  state.splits = state.splits.filter(s=>s.id!==editingSplitId);
+  if(state.activeSplitId===editingSplitId){ state.activeSplitId=null; state.activeSplitDayIdx=0; }
+  save();
+  closeSheets();
+  showToast('Split deleted');
+  renderAll();
+}
+function advanceSplitDay(){
+  const s = state.splits.find(s=>s.id===state.activeSplitId);
+  if(!s) return;
+  state.activeSplitDayIdx = (state.activeSplitDayIdx+1) % s.days.length;
+  save();
+  renderAll();
+  showToast('Moved to next day: '+s.days[state.activeSplitDayIdx].name);
+}
+function quickFillWorkout(name){
+  openWorkoutSheet();
+  document.getElementById('woName').value = name;
+}
+function renderSplitCard(){
+  const card = document.getElementById('splitCard');
+  const btn = document.getElementById('advanceDayBtn');
+  const s = state.splits.find(s=>s.id===state.activeSplitId);
+  if(!s){
+    card.innerHTML = `<div class="empty">No active split. Build one to plan your training days.</div>`;
+    btn.style.display = 'none';
+    return;
+  }
+  const day = s.days[state.activeSplitDayIdx % s.days.length];
+  const exList = day.exercises.split(',').map(e=>e.trim()).filter(Boolean);
+  card.innerHTML = `
+    <div class="row" style="margin-bottom:${exList.length?'10px':'0'}">
+      <div><div class="name">${escapeHtml(s.name)}</div><div class="meta">Today: ${escapeHtml(day.name)}</div></div>
+    </div>
+    ${exList.length ? `<div class="chip-row" style="margin:0">${exList.map(e=>`<button class="chip" onclick="quickFillWorkout('${escapeHtml(e).replace(/'/g,"\\'")}')">${escapeHtml(e)}</button>`).join('')}</div>` : ''}
+  `;
+  btn.style.display = 'inline-flex';
+}
+
+/* ---------------- Water ---------------- */
+function addWater(ml){
+  const d = getDay();
+  d.water = Math.max(0, d.water + ml);
+  touchStreak();
+  save();
+  renderAll();
+}
+
+/* ---------------- Goals ---------------- */
+function saveCalGoal(){
+  const v = +document.getElementById('calGoalInput').value;
+  if(v>0){ state.settings.calorieGoal = v; save(); showToast('Calorie goal updated'); renderAll(); }
+}
+function saveWaterGoal(){
+  const v = +document.getElementById('waterGoalInput').value;
+  if(v>0){ state.settings.waterGoal = v; save(); showToast('Water goal updated'); renderAll(); }
+}
+
+/* ---------------- Reminders ---------------- */
+function openReminderSheet(){
+  document.getElementById('rLabel').value='';
+  document.getElementById('rTime').value='12:00';
+  document.getElementById('rType').value='custom';
+  openSheet('sheetReminder');
+}
+function saveReminder(){
+  const label = document.getElementById('rLabel').value.trim();
+  const time = document.getElementById('rTime').value;
+  const type = document.getElementById('rType').value;
+  if(!label || !time){ showToast('Fill in label and time'); return; }
+  state.reminders.push({ id:uid(), label, time, type, enabled:true, lastFired:null });
+  save();
+  syncNativeReminders();
+  closeSheets();
+  showToast('Reminder set');
+  renderAll();
+}
+function toggleReminder(id){
+  const r = state.reminders.find(r=>r.id===id);
+  if(r){ r.enabled = !r.enabled; save(); syncNativeReminders(); renderAll(); }
+}
+function deleteReminder(id){
+  state.reminders = state.reminders.filter(r=>r.id!==id);
+  save(); syncNativeReminders(); renderAll();
+}
+
+function requestNotifPermission(){
+  if(!('Notification' in window)){ showToast('Notifications not supported in this browser'); return; }
+  Notification.requestPermission().then(renderNotifCard);
+}
+function renderNotifCard(){
+  const txt = document.getElementById('notifStatusText');
+  const btn = document.getElementById('notifEnableBtn');
+  if(!('Notification' in window)){ txt.textContent = 'Not supported on this browser'; btn.style.display='none'; return; }
+  if(Notification.permission === 'granted'){ txt.textContent = 'Enabled — nudges will pop up while IronLog is open'; btn.style.display='none'; }
+  else if(Notification.permission === 'denied'){ txt.textContent = 'Blocked in browser settings'; btn.style.display='none'; }
+  else { txt.textContent = 'Not enabled yet'; btn.style.display='inline-flex'; }
+}
+
+const REMINDER_ICON = {meal:'🍽️', water:'💧', lift:'🏋️', custom:'⏰'};
+const REMINDER_TEXT = {
+  meal: l=>`Time to eat — ${l}`,
+  water: l=>`Hydration check — ${l}`,
+  lift: l=>`Training time — ${l}`,
+  custom: l=>l
+};
+function checkReminders(){
+  const t = todayKey();
+  const hhmm = nowTime();
+  state.reminders.forEach(r=>{
+    if(!r.enabled) return;
+    if(r.time !== hhmm) return;
+    if(r.lastFired === t) return;
+    r.lastFired = t;
+    const msg = (REMINDER_TEXT[r.type]||REMINDER_TEXT.custom)(r.label);
+    fireReminder(msg);
+  });
+  save();
+}
+function fireReminder(msg){
+  if('Notification' in window && Notification.permission==='granted'){
+    try{ new Notification('IronLog', { body: msg }); }catch(e){}
+  }
+  showToast(msg);
+}
+setInterval(checkReminders, 20000);
+
+/* ---------------- Render ---------------- */
+function escapeHtml(s){ return String(s).replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+function renderAll(){
+  document.getElementById('headerDate').textContent = new Date().toLocaleDateString(undefined,{weekday:'short', month:'short', day:'numeric'});
+  const d = getDay();
+  const cal = d.meals.reduce((s,m)=>s+m.cals,0);
+  const goal = state.settings.calorieGoal;
+  const left = Math.max(0, goal-cal);
+  const pct = Math.min(100, Math.round(cal/goal*100)) || 0;
+
+  // Home
+  document.getElementById('homeCalLeft').textContent = left;
+  document.getElementById('homeCalSub').textContent = `${cal} / ${goal} kcal`;
+  document.getElementById('homeCalBar').style.width = pct+'%';
+  document.getElementById('homeCalBar').style.background = cal>goal ? 'var(--red)' : 'var(--coral)';
+  document.getElementById('coachLine').textContent = pickCoachLine();
+  document.getElementById('homeWater').textContent = d.water;
+  document.getElementById('homeSets').textContent = d.workouts.reduce((s,w)=>s+w.sets.length,0);
+  document.getElementById('homeStreak').textContent = state.streak.count;
+  document.getElementById('guardCount').textContent = Math.max(0, 1-state.settings.guardsUsedThisWeek);
+
+  const upcoming = state.reminders.filter(r=>r.enabled).sort((a,b)=>a.time.localeCompare(b.time));
+  document.getElementById('homeReminders').innerHTML = upcoming.length ? upcoming.map(r=>`
+    <div class="row"><div><div class="name">${REMINDER_ICON[r.type]} ${escapeHtml(r.label)}</div></div><div class="val" style="font-size:15px;color:var(--ink-dim)">${r.time}</div></div>
+  `).join('') : `<div class="empty">No reminders set. Add one in the Alerts tab.</div>`;
+
+  // Lift tab
+  renderSplitCard();
+  document.getElementById('liftHeroNum').textContent = d.workouts.reduce((s,w)=>s+w.sets.length,0);
+  document.getElementById('liftPrBadge').style.display = d.workouts.some(w=>w.pr) ? 'inline-flex' : 'none';
+  document.getElementById('liftToday').innerHTML = d.workouts.length ? d.workouts.slice().reverse().map(w=>`
+    <div class="card">
+      <div class="row"><div class="name">${w.pr?'🏆 ':''}${escapeHtml(w.name)}</div><div class="meta">${w.time}</div></div>
+      <div class="meta" style="margin-top:6px">${w.sets.map(s=>`${s.reps}×${s.weight}kg`).join(' · ')}</div>
+    </div>
+  `).join('') : `<div class="empty">No lifts yet today. Load the bar.</div>`;
+
+  const histKeys = Object.keys(state.days).filter(k=>k!==todayKey() && state.days[k].workouts.length).sort().reverse().slice(0,10);
+  document.getElementById('liftHistory').innerHTML = histKeys.length ? histKeys.map(k=>{
+    const dd = state.days[k];
+    const totalSets = dd.workouts.reduce((s,w)=>s+w.sets.length,0);
+    const names = [...new Set(dd.workouts.map(w=>w.name))].join(', ');
+    return `<div class="card"><div class="row"><div class="name">${k}</div><div class="val" style="font-size:16px">${totalSets} sets</div></div><div class="meta" style="margin-top:4px">${escapeHtml(names)}</div></div>`;
+  }).join('') : `<div class="empty">History will build up here as you log lifts.</div>`;
+
+  // Meals tab
+  document.getElementById('mealHeroNum').textContent = cal;
+  document.getElementById('mealHeroSub').textContent = `Goal ${goal} kcal`;
+  document.getElementById('mealBar').style.width = pct+'%';
+  document.getElementById('mealBar').style.background = cal>goal ? 'var(--red)' : 'var(--coral)';
+  document.getElementById('calGoalInput').value = goal;
+  document.getElementById('mealList').innerHTML = d.meals.length ? d.meals.slice().reverse().map(m=>`
+    <div class="card" style="cursor:pointer" onclick="editMeal('${m.id}')"><div class="row">
+      <div><div class="name">${escapeHtml(m.name)}</div><div class="meta">${m.type} · ${m.time}${(m.protein||m.carbs||m.fat) ? ` · P${m.protein||0} C${m.carbs||0} F${m.fat||0}` : ''}</div></div>
+      <div class="val">${m.cals}<span style="font-size:12px;color:var(--ink-dim)"> kcal</span></div>
+    </div></div>
+  `).join('') : `<div class="empty">Nothing logged yet. Add your first meal.</div>`;
+  document.getElementById('mealProteinTotal').textContent = d.meals.reduce((s,m)=>s+(m.protein||0),0);
+  document.getElementById('mealCarbsTotal').textContent = d.meals.reduce((s,m)=>s+(m.carbs||0),0);
+  document.getElementById('mealFatTotal').textContent = d.meals.reduce((s,m)=>s+(m.fat||0),0);
+
+  // Water tab
+  const wGoal = state.settings.waterGoal;
+  const wPct = Math.min(100, Math.round(d.water/wGoal*100)) || 0;
+  document.getElementById('waterHeroNum').innerHTML = `${d.water}<span style="font-size:22px">ml</span>`;
+  document.getElementById('waterHeroSub').textContent = `Goal ${wGoal} ml`;
+  document.getElementById('waterBar').style.width = wPct+'%';
+  document.getElementById('waterGoalInput').value = wGoal;
+  const totalGlasses = Math.max(8, Math.ceil(wGoal/250));
+  const filled = Math.round(d.water/250);
+  document.getElementById('glassGrid').innerHTML = Array.from({length:totalGlasses}).map((_,i)=>`<div class="glass ${i<filled?'filled':''}">💧</div>`).join('');
+
+  // Reminders tab
+  renderNotifCard();
+  document.getElementById('reminderList').innerHTML = state.reminders.length ? state.reminders.slice().sort((a,b)=>a.time.localeCompare(b.time)).map(r=>`
+    <div class="card"><div class="row">
+      <div><div class="name">${REMINDER_ICON[r.type]} ${escapeHtml(r.label)}</div><div class="meta">${r.time}</div></div>
+      <div style="display:flex;align-items:center;gap:10px">
+        <div class="switch ${r.enabled?'on':''}" onclick="toggleReminder('${r.id}')"></div>
+        <button class="icon-btn" onclick="deleteReminder('${r.id}')">✕</button>
+      </div>
+    </div></div>
+  `).join('') : `<div class="empty">No reminders yet.</div>`;
+}
+
+renderAll();
+checkReminders();
+syncNativeReminders();
+initSampleCapability();
+</script>
+</body>
+</html>
